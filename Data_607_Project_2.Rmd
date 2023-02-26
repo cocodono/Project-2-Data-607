@@ -1,0 +1,68 @@
+---
+title: "Project 2"
+author: "Coco Donovan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Introduction:
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading Necessary Packages
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(readr)
+library(reshape2)
+library(stringr)
+```
+
+## Loading Data Source 1: Student Testing Data (Alice Ding)
+
+```{r}
+ds1_link <- 'https://gist.githubusercontent.com/Kimmirikwa/b69d0ea134820ea52f8481991ffae93e/raw/4db7b1698035ee29885d10e1a59bd902716ae168/student_results.csv'
+
+ds1 <- read_csv(ds1_link)
+```
+
+## Cleaning Data Source 1
+
+```{r}
+ds1 <- ds1 %>%
+  melt(id.vars = c('id', 'name', 'phone', 'sex and age','test number')) %>%
+  rename(`term number` = variable, score = value)
+
+ds1[c('sex', 'age')] <- str_split_fixed(ds1$`sex and age`, '_', 2)
+
+ds1 <- ds1 %>%
+  mutate(age = as.numeric(age)) %>%
+  select(-`sex and age`)
+```
+
+## Converting ds1 to a csv
+
+```{r}
+write.csv(ds1, 'Students_Test_Scores.csv')
+```
+
+## Loading Data Source 2: 
+
+```{r}
+
+```
+
+## Loading Data Source 3: 
+
+```{r}
+
+
+```
+
+
+
+## Conclusion:
+
