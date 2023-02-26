@@ -1,4 +1,4 @@
-"","id","name","phone","sex","age","test number","term number","score"
+"","id","name","phone","gender","age","test number","term number","score"
 "1",1,"Mike",134,"m",12,"test 1","term 1",76
 "2",2,"Linda",270,"f",13,"test 1","term 1",88
 "3",3,"Sam",210,"m",11,"test 1","term 1",78
