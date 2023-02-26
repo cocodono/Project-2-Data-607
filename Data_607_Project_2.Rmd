@@ -36,11 +36,11 @@ ds1 <- ds1 %>%
   melt(id.vars = c('id', 'name', 'phone', 'sex and age','test number')) %>%
   rename(`term number` = variable, score = value)
 
-ds1[c('sex', 'age')] <- str_split_fixed(ds1$`sex and age`, '_', 2)
-
 ds1 <- ds1 %>%
-  mutate(age = as.numeric(age)) %>%
-  select(-`sex and age`)
+  separate(`sex and age`, into = c("gender", "age"), sep = "_") %>%
+  mutate(age = as.numeric(age))
+
+ds1
 ```
 
 ## Converting ds1 to a csv
@@ -49,16 +49,80 @@ ds1 <- ds1 %>%
 write.csv(ds1, 'Students_Test_Scores.csv')
 ```
 
-## Loading Data Source 2: 
+## The suggested analysis for Data Source One
+
+The suggested analysis was, "We could find the average test score for each student or average test score overall. We could also count how many students are of each sex and find the average age as well."
 
 ```{r}
+# Average Test Score
+avg_by_student <- ds1 %>%
+  group_by(name) %>%
+  summarise(avg_test_score = mean(score)) %>%
+  arrange(desc(avg_test_score))
 
+knitr::kable(avg_by_student)
+
+# Counts per gender
+gender_counts <- unique(ds1[c("id", "gender")]) %>%
+  group_by(gender) %>%
+  summarize(count = n())
+
+knitr::kable(gender_counts)
+
+# Averages by gender
+avg_by_gender <- ds1 %>%
+  group_by(gender) %>%
+  summarise(avg_test_score = mean(score)) %>%
+  arrange(desc(avg_test_score))
+
+knitr::kable(avg_by_gender)
+```
+
+## Loading Data Source 2: Religion and Income
+
+I should note that I did not realize that RStudio has a built in table 
+relig_income, but it had more religions than the example I originally provided,
+so I just recreated the example I provided for consistency.
+
+```{r}
+relig_inc <- read_csv('Raw_Religion_Income.csv')
+```
+
+## Cleaning Data Source 2
+
+```{r}
+relig_inc <- relig_inc %>%
+  melt(id.vars = 'religion') %>%
+  mutate(income_level = variable, count = value) %>%
+  select(-variable, -value)
+
+relig_inc
+```
+
+## Writing relig_inc to a csv
+
+```{r}
+write.csv(relig_inc, "Religion_&_Income_Levels.csv")
+```
+
+## The suggested analysis for Data Source Two
+
+The suggested analysis was, "As far as analysis goes you could group by religion
+and see what the religious makeup of all respondents was by percentages."
+
+```{r}
+# Percent of respondents at each income level by religion
+
+percents <- relig_inc %>%
+  group_by(religion) %>%
+  mutate(percent = round(100 * count/sum(count), 2)) %>%
+  ungroup() %>%
+  arrange(religion)
 ```
 
 ## Loading Data Source 3: 
 
 ```{r}
-
 
 ```
 
