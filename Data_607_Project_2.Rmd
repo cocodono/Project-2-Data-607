@@ -7,6 +7,12 @@ output: html_document
 
 ## Introduction:
 
+For this project I chose three data sources to clean and perform analysis. The 
+data sources are student test scores, presidential voting data, and different 
+religions' income break downs. All three data sets are examples of wide data and 
+in this project I will attempt to make the data more usable analysis and then 
+go on to conduct said analysis.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -19,6 +25,7 @@ library(dplyr)
 library(readr)
 library(reshape2)
 library(stringr)
+library(ggplot2)
 ```
 
 ## Loading Data Source 1: Student Testing Data (Alice Ding)
@@ -40,7 +47,7 @@ ds1 <- ds1 %>%
   separate(`sex and age`, into = c("gender", "age"), sep = "_") %>%
   mutate(age = as.numeric(age))
 
-ds1
+knitr::kable(head(ds1))
 ```
 
 ## Converting ds1 to a csv
@@ -96,7 +103,7 @@ relig_inc <- relig_inc %>%
   mutate(income_level = variable, count = value) %>%
   select(-variable, -value)
 
-relig_inc
+knitr::kable(head(relig_inc))
 ```
 
 ## Writing relig_inc to a csv
@@ -118,15 +125,95 @@ percents <- relig_inc %>%
   mutate(percent = round(100 * count/sum(count), 2)) %>%
   ungroup() %>%
   arrange(religion)
+
+knitr::kable(head(percents))
 ```
 
 ## Loading Data Source 3: 
 
 ```{r}
+votes <- read_csv("presidential_vote_tallies.csv")
+```
 
+## Cleaning voter data and writing to a CSV
+
+```{r}
+votes <- votes %>%
+  melt(id.vars = 'Candidate') %>%
+  rename(State = variable, Number_of_votes = value)
+
+knitr::kable(head(votes))
+
+write.csv(votes,"vote_totals_by_state.csv")
+```
+
+## Analysis of voter data
+
+The requested analysis was, "As per analysis, we can compare the vote counts in 
+each state vs candidate." So I decided to looks at the percentage results by 
+state for each candidate.
+
+```{r}
+voting_percents <- votes %>%
+  group_by(State) %>%
+  mutate(percent = round(100 * Number_of_votes/sum(Number_of_votes), 2)) %>%
+  ungroup() %>%
+  select(-Number_of_votes) 
+
+knitr::kable(voting_percents)
+```
+
+## Graphing voter data
+
+```{r}
+ggplot(data = voting_percents, aes(x = State, y = percent, fill = Candidate)) +
+  geom_bar(stat = "identity", position = position_dodge(), alpha = 0.75)  +
+  ylim(0,65) + 
+  geom_text(aes(label = percent), fontface = "bold", vjust = 1.5,
+             position = position_dodge(.9), size = 4) +
+  labs(x = "State", title = "Candidate Percentages by State")
+
+```
+
+## Total Votes
+
+I wanted to highlight the difference between popular opinion v.s. the electoral 
+process.
+
+```{r}
+vote_totals <-votes %>%
+  group_by(Candidate) %>%
+  summarise(total_votes = sum(Number_of_votes)) %>%
+  mutate(total_percents = round(100 * total_votes/sum(total_votes),2)) %>%
+  select(-total_votes)
+
+knitr::kable(head(vote_totals))
 ```
 
 
 
+```{r}
+ggplot(data = vote_totals, aes(x = Candidate, y = total_percents, fill = Candidate)) +
+  geom_bar(stat = "identity", position = position_dodge(), alpha = 0.75)  +
+  ylim(0,60) + 
+  geom_text(aes(label = total_percents), fontface = "bold", vjust = 1.5,
+             position = position_dodge(.9), size = 4) +
+  labs(x = "Candidate", title = "Candidate Total Percentages")
+```
+
+While this analysis only represents two states out of all fifty, it hopefully
+illustrates the disconnect between popular opinion and the president who may be 
+elected. Trump did not win the popular vote, meaning a minority of American's 
+stated using a specific single choice voting method that they wanted Trump to
+be president and yet Trump won.
+
 ## Conclusion:
 
+In this project I cleaned three data sources and performed analysis on each. I 
+displayed students average grades by individual student and then by student 
+gender. I went on to provide the percentage breakdowns of income by religion and
+concluded my project with an analysis of 2016 presidential election vote count
+from Florida and California. In my analysis, I found that tidyr, dplyr, and 
+reshape2 were especially helpful packages. I had also used the function "melt" 
+once before, and having used it in the past I relied heavily on it for the
+purpose of this project.
